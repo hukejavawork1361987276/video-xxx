@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd">
+<mapper namespace="com.zhiyou100.video.mapper.UserMapper">
+<select id="selectMail1" parameterType="String" resultType="Integer" >
+select count(1) from user where email=#{email};
+</select>
+<insert id="userRegister" parameterType="java.util.HashMap">
+insert into user (email,password,insert_time)values(#{email},#{password1},#{timestamp});
+</insert>
+<update id="addCaptcha" parameterType="java.util.HashMap">
+update user set captcha=#{num} where email=#{email};
+</update>
+<select id="captchaYZ" parameterType="java.util.HashMap" resultType="Integer">
+select count(1) from user where captcha=#{captcha} and email=#{email};
+</select>
+<update id="resetpwd" parameterType="java.util.HashMap">
+update user set password=#{password} where email=#{email} and captcha=#{captcha}; 
+</update>
+<select id="login" parameterType="java.util.HashMap" resultType="user">
+select * from user where  email=#{email} and password=#{password};
+</select>
+<update id="updateInfo" parameterType="user">
+update user set nick_name=#{nick_name},sex=#{sex},province=#{province} ,birthday=#{birthday},city=#{city},update_time=#{update_time} where email=#{email} ; 
+</update>
+<select id="findAllInf" parameterType="user" resultType="user">
+select*from user where email=#{email};
+</select>
+<update id="updateHeadUrl">
+update user set head_url=#{head_url}
+</update>
+<select id="findOldpassword" parameterType="java.util.HashMap" resultType="Integer">
+select count(1) from user where email=#{email} and Password=#{oldPassword};
+</select>
+<update id="updatePassword" parameterType="java.util.HashMap">
+update user set password=#{newPassword} where email=#{email};
+</update>
+<select id="findSubject" parameterType="Integer" resultType="subject">
+select *from subject where id=#{x};
+</select>
+
+<resultMap type="course" id="videolist">
+<id column="coursetable_id" property="id"/>
+
+<result column="course_name" property="course_name"/>
+<result column="course_descr" property="course_descr"/>
+<collection property="videoList" ofType="video">
+
+<result column="id" property="id"/>
+<result column="video_title" property="video_title"/>
+<result column="video_image_url" property="video_image_url"/>
+<result column="video_play_times" property="video_play_times"/>
+<result column="video_length" property="video_length"/>
+</collection>
+</resultMap>
+
+
+<select id="findCourseVideo" parameterType="Integer" resultMap="videolist">
+select *from (select *from(select s.subject_name,s.id subject_id, 
+c.course_name,c.id coursetable_id,c.course_descr  from subject s 
+left join course c on  s.id=c.subject_id)ss left join video v 
+on ss.coursetable_id=v.course_id)xx where xx.subject_id=#{c};
+</select>
+<select id="findVideo" parameterType="String" resultType="video">
+ select   c.subject_id subject_id ,v.video_image_url,v.video_title,v.video_descr from course c,video v,subject s where  s.id=c.subject_id  and v.course_id=c.id and v.id=#{zx};
+ </select>
+ <select id="findSpeaker" parameterType="Integer" resultType="speaker">
+ select*from speaker where id=#{id};
+ </select>
+ <select id="findCourse"  parameterType="String" resultType="course">
+ select course_descr from course c,video v where v.course_id=c.id and v.id=#{s};
+ </select>
+ 
+ <select id="findVideos" parameterType="Integer" resultType="video">
+ select  DISTINCT v.id,v.video_descr,s.speaker_name ,
+ v.video_play_times,v.video_length,v.video_title from
+  course c,video v,speaker s where v.speaker_id=s.id and v.course_id=#{ds};
+ </select>
+ <update id="updateCount" parameterType="Integer">
+ update video set video_play_times=video_play_times+1 where id=#{ds};
+ </update>
+ 
+ <select id="findVideoinf" parameterType="String" resultType="video">
+ select *from video where id=#{d};
+ </select>
+</mapper>
